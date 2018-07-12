@@ -1,5 +1,28 @@
 version: 2
 jobs:
+  ensure:
+    docker:
+      - image: matfax/cci-build:golang
+
+    working_directory: /go/src/github.com/matfax/go-redis-wrapper
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: dep-
+      - run:
+          command: dep ensure
+          name: Update dependencies
+      - save_cache:
+          key: dep-{{ checksum "Gopkg.toml" }}-{{ checksum "Gopkg.lock" }}
+          paths:
+            - vendor
+            - Gopkg.lock
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/*
+            - Gopkg.lock
   test:
     docker:
       - image: matfax/cci-build:golang
@@ -12,19 +35,11 @@ jobs:
 
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: Create Test Folder
           command: mkdir -p $TEST_RESULTS
-      - restore_cache:
-          key: dep-
-      - run:
-          command: dep ensure
-          name: Update dependencies
-      - save_cache:
-          key: dep-{{ checksum "Gopkg.toml" }}-{{ checksum "Gopkg.lock" }}
-          paths:
-          - vendor
-          - Gopkg.lock
       - run:
           name: Wait for Redis
           # preinstalled in circleci/* docker image
@@ -34,16 +49,91 @@ jobs:
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test-report.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test -v ./... | tee ${TEST_RESULTS}/go-test-report.out
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+  race_test:
+    docker:
+      - image: matfax/cci-build:golang
+      - image: redis
+
+    working_directory: /go/src/github.com/matfax/go-redis-wrapper
+
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create Test Folder
+          command: mkdir -p $TEST_RESULTS
+      - run:
+          name: Wait for Redis
+          # preinstalled in circleci/* docker image
+          command: dockerize -wait tcp://localhost:6379 -timeout 60s
       - run:
           name: Run Race Tests
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-race-test-report.out > ${TEST_RESULTS}/go-race-test-report.xml" EXIT
             go test -v ./... -short -race | tee ${TEST_RESULTS}/go-race-test-report.out
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+  i386_test:
+    docker:
+      - image: matfax/cci-build:golang
+      - image: redis
+
+    working_directory: /go/src/github.com/matfax/go-redis-wrapper
+
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create Test Folder
+          command: mkdir -p $TEST_RESULTS
+      - run:
+          name: Wait for Redis
+          # preinstalled in circleci/* docker image
+          command: dockerize -wait tcp://localhost:6379 -timeout 60s
       - run:
           name: Run 386 Tests
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-386-test-report.out > ${TEST_RESULTS}/go-386-test-report.xml" EXIT
             env GOOS=linux GOARCH=386 go test -v ./... | tee ${TEST_RESULTS}/go-386-test-report.out
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+  coverage_test:
+    docker:
+      - image: matfax/cci-build:golang
+      - image: redis
+
+    working_directory: /go/src/github.com/matfax/go-redis-wrapper
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create Test Folder
+          command: mkdir -p $TEST_RESULTS
+      - run:
+          name: Wait for Redis
+          # preinstalled in circleci/* docker image
+          command: dockerize -wait tcp://localhost:6379 -timeout 60s
       - run:
           name: Run Coverage Tests
           command: |
@@ -55,11 +145,21 @@ jobs:
       - store_artifacts:
           path: /tmp/test-results
           destination: raw-test-output
-      - store_test_results:
-          path: /tmp/test-results
 
 workflows:
   version: 2
   test:
     jobs:
-      - test
+      - ensure
+      - test:
+          requires:
+            - ensure
+      - race_test:
+          requires:
+            - ensure
+      - i386_test:
+          requires:
+            - ensure
+      - coverage_test:
+          requires:
+            - ensure
