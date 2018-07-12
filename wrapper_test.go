@@ -17,7 +17,7 @@ import (
 
 func TestGinkgo(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "cache")
+	RunSpecs(t, "wrapper")
 }
 
 func perform(n int, cbs ...func(int)) {

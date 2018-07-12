@@ -2,18 +2,18 @@ package wrapper
 
 import (
 	"errors"
-	"log"
-	"sync/atomic"
 	"time"
 
 	"github.com/go-redis/redis"
 
 	"github.com/matfax/go-redis-wrapper/internal/lrucache"
 	"github.com/matfax/go-redis-wrapper/internal/singleflight"
+	"log"
+	"sync/atomic"
 )
 
-var ErrCacheMiss = errors.New("cache: key is missing")
-var errRedisLocalCacheNil = errors.New("cache: both Redis and LocalCache are nil")
+var ErrCacheMiss = errors.New("wrapper: key is missing")
+var errRedisLocalCacheNil = errors.New("wrapper: both Redis and LocalCache are nil")
 
 type rediser interface {
 	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
@@ -21,6 +21,7 @@ type rediser interface {
 	Del(keys ...string) *redis.IntCmd
 }
 
+// Item represents a cache item and its relating attributes.
 type Item struct {
 	Key    string
 	Object interface{}
@@ -53,6 +54,7 @@ func (item *Item) exp() time.Duration {
 	return item.Expiration
 }
 
+// Codec contains the wrapping codec and the related Redis attributes and statistics.
 type Codec struct {
 	Redis rediser
 
@@ -198,9 +200,8 @@ func (cd *Codec) Once(item *Item) error {
 		if cached {
 			_ = cd.Delete(item.Key)
 			return cd.Once(item)
-		} else {
-			return err
 		}
+		return err
 	}
 
 	return nil
