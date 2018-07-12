@@ -2,6 +2,7 @@
 [![CircleCI](https://circleci.com/gh/matfax/go-redis-wrapper/tree/master.svg?style=svg)](https://circleci.com/gh/matfax/go-redis-wrapper/tree/master)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper?ref=badge_shield)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f4a76a1c71446b2a50e0fc3134f8fd8)](https://www.codacy.com/app/matfax/go-redis-wrapper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matfax/go-redis-wrapper&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/3f4a76a1c71446b2a50e0fc3134f8fd8)](https://www.codacy.com/app/matfax/go-redis-wrapper?utm_source=github.com&utm_medium=referral&utm_content=matfax/go-redis-wrapper&utm_campaign=Badge_Coverage)
 
 ## Installation
 
