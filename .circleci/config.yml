@@ -39,7 +39,7 @@ jobs:
           at: .
       - run:
           name: Create Test Folder
-          command: mkdir -p $TEST_RESULTS
+          command: mkdir -pv $TEST_RESULTS
       - run:
           name: Wait for Redis
           # preinstalled in circleci/* docker image
@@ -70,7 +70,7 @@ jobs:
           at: .
       - run:
           name: Create Test Folder
-          command: mkdir -p $TEST_RESULTS
+          command: mkdir -pv $TEST_RESULTS
       - run:
           name: Wait for Redis
           # preinstalled in circleci/* docker image
@@ -101,7 +101,7 @@ jobs:
           at: .
       - run:
           name: Create Test Folder
-          command: mkdir -p $TEST_RESULTS
+          command: mkdir -pv $TEST_RESULTS
       - run:
           name: Wait for Redis
           # preinstalled in circleci/* docker image
@@ -123,13 +123,16 @@ jobs:
 
     working_directory: /go/src/github.com/matfax/go-redis-wrapper
 
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run:
           name: Create Test Folder
-          command: mkdir -p $TEST_RESULTS
+          command: mkdir -pv $TEST_RESULTS
       - run:
           name: Wait for Redis
           # preinstalled in circleci/* docker image
