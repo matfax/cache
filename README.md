@@ -1,9 +1,10 @@
-# Redis cache library for Golang [![Build Status](https://travis-ci.org/go-redis/cache.svg?branch=v3)](https://travis-ci.org/go-redis/cache)
+# Redis cache library for Golang
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper?ref=badge_shield)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f4a76a1c71446b2a50e0fc3134f8fd8)](https://www.codacy.com/app/matfax/go-redis-wrapper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matfax/go-redis-wrapper&amp;utm_campaign=Badge_Grade)
 
 ## Installation
 
-    go get github.com/go-redis/cache
+    go get github.com/matfax/go-redis-wrapper
 
 ## Quickstart
 
@@ -18,7 +19,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/vmihailenco/msgpack"
 
-	"github.com/go-redis/cache"
+	"github.com/matfax/go-redis-wrapper"
 )
 
 type Object struct {

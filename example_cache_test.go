@@ -1,4 +1,4 @@
-package cache_test
+package wrapper_test
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/vmihailenco/msgpack"
 
-	"github.com/go-redis/cache"
+	"github.com/matfax/go-redis-wrapper"
 )
 
 type Object struct {
@@ -23,7 +23,7 @@ func Example_basicUsage() {
 		},
 	})
 
-	codec := &cache.Codec{
+	codec := &wrapper.Codec{
 		Redis: ring,
 
 		Marshal: func(v interface{}) ([]byte, error) {
@@ -40,7 +40,7 @@ func Example_basicUsage() {
 		Num: 42,
 	}
 
-	codec.Set(&cache.Item{
+	codec.Set(&wrapper.Item{
 		Key:        key,
 		Object:     obj,
 		Expiration: time.Hour,
@@ -62,7 +62,7 @@ func Example_advancedUsage() {
 		},
 	})
 
-	codec := &cache.Codec{
+	codec := &wrapper.Codec{
 		Redis: ring,
 
 		Marshal: func(v interface{}) ([]byte, error) {
@@ -74,7 +74,7 @@ func Example_advancedUsage() {
 	}
 
 	obj := new(Object)
-	err := codec.Once(&cache.Item{
+	err := codec.Once(&wrapper.Item{
 		Key:    "mykey",
 		Object: obj, // destination
 		Func: func() (interface{}, error) {

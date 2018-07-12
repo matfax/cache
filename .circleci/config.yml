@@ -1,0 +1,65 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: matfax/cci-build:golang
+      - image: redis
+
+    working_directory: /go/src/github.com/matfax/go-redis-wrapper
+
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
+    steps:
+      - checkout
+      - run:
+          name: Create Test Folder
+          command: mkdir -p $TEST_RESULTS
+      - restore_cache:
+          key: dep-
+      - run:
+          command: dep ensure
+          name: Update dependencies
+      - save_cache:
+          key: dep-{{ checksum "Gopkg.toml" }}-{{ checksum "Gopkg.lock" }}
+          paths:
+          - vendor
+          - Gopkg.lock
+      - run:
+          name: Wait for Redis
+          # preinstalled in circleci/* docker image
+          command: dockerize -wait tcp://localhost:6379 -timeout 60s
+      - run:
+          name: Run Tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-test-report.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            go test -v ./... | tee ${TEST_RESULTS}/go-test-report.out
+      - run:
+          name: Run Race Tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-race-test-report.out > ${TEST_RESULTS}/go-race-test-report.xml" EXIT
+            go test -v ./... -short -race | tee ${TEST_RESULTS}/go-race-test-report.out
+      - run:
+          name: Run 386 Tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-386-test-report.out > ${TEST_RESULTS}/go-386-test-report.xml" EXIT
+            env GOOS=linux GOARCH=386 go test -v ./... | tee ${TEST_RESULTS}/go-386-test-report.out
+      - run:
+          name: Run Coverage Tests
+          command: |
+            goverage -v -coverprofile=${TEST_RESULTS}/coverage.out ./...
+      - run:
+          name: Push Coverage Results
+          command: |
+            godacov -t $CODACY_TOKEN -r ${TEST_RESULTS}/coverage.out -c $CIRCLE_SHA1 || true
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test

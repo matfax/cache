@@ -1,11 +1,11 @@
-package cache_test
+package wrapper_test
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/go-redis/cache"
+	"github.com/matfax/go-redis-wrapper"
 )
 
 func BenchmarkOnce(b *testing.B) {
@@ -17,7 +17,7 @@ func BenchmarkOnce(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			var n int
-			err := codec.Once(&cache.Item{
+			err := codec.Once(&wrapper.Item{
 				Key:    "bench-once",
 				Object: &n,
 				Func: func() (interface{}, error) {

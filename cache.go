@@ -1,4 +1,4 @@
-package cache
+package wrapper
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-redis/redis"
 
-	"github.com/go-redis/cache/internal/lrucache"
-	"github.com/go-redis/cache/internal/singleflight"
+	"github.com/matfax/go-redis-wrapper/internal/lrucache"
+	"github.com/matfax/go-redis-wrapper/internal/singleflight"
 )
 
 var ErrCacheMiss = errors.New("cache: key is missing")

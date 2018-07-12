@@ -1,4 +1,4 @@
-package cache_test
+package wrapper_test
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/vmihailenco/msgpack"
 
-	"github.com/go-redis/cache"
+	"github.com/matfax/go-redis-wrapper"
 )
 
 func TestGinkgo(t *testing.T) {
@@ -40,11 +40,11 @@ var _ = Describe("Codec", func() {
 	const key = "mykey"
 	var obj *Object
 
-	var codec *cache.Codec
+	var codec *wrapper.Codec
 
 	testCodec := func() {
 		It("Gets and Sets nil", func() {
-			err := codec.Set(&cache.Item{
+			err := codec.Set(&wrapper.Item{
 				Key:        key,
 				Expiration: time.Hour,
 			})
@@ -57,7 +57,7 @@ var _ = Describe("Codec", func() {
 		})
 
 		It("Deletes key", func() {
-			err := codec.Set(&cache.Item{
+			err := codec.Set(&wrapper.Item{
 				Key:        key,
 				Expiration: time.Hour,
 			})
@@ -69,13 +69,13 @@ var _ = Describe("Codec", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			err = codec.Get(key, nil)
-			Expect(err).To(Equal(cache.ErrCacheMiss))
+			Expect(err).To(Equal(wrapper.ErrCacheMiss))
 
 			Expect(codec.Exists(key)).To(BeFalse())
 		})
 
 		It("Gets and Sets data", func() {
-			err := codec.Set(&cache.Item{
+			err := codec.Set(&wrapper.Item{
 				Key:        key,
 				Object:     obj,
 				Expiration: time.Hour,
@@ -92,7 +92,7 @@ var _ = Describe("Codec", func() {
 
 		Describe("Once func", func() {
 			It("calls Func when cache fails", func() {
-				err := codec.Set(&cache.Item{
+				err := codec.Set(&wrapper.Item{
 					Key:    key,
 					Object: "*",
 				})
@@ -102,7 +102,7 @@ var _ = Describe("Codec", func() {
 				err = codec.Get(key, &got)
 				Expect(err).To(MatchError("msgpack: invalid code=a1 decoding bool"))
 
-				err = codec.Once(&cache.Item{
+				err = codec.Once(&wrapper.Item{
 					Key:    key,
 					Object: &got,
 					Func: func() (interface{}, error) {
@@ -122,7 +122,7 @@ var _ = Describe("Codec", func() {
 				var callCount int64
 				perform(100, func(int) {
 					got := new(Object)
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key:    key,
 						Object: got,
 						Func: func() (interface{}, error) {
@@ -140,7 +140,7 @@ var _ = Describe("Codec", func() {
 				var callCount int64
 				perform(100, func(int) {
 					got := new(Object)
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key:    key,
 						Object: got,
 						Func: func() (interface{}, error) {
@@ -158,7 +158,7 @@ var _ = Describe("Codec", func() {
 				var callCount int64
 				perform(100, func(int) {
 					var got bool
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key:    key,
 						Object: &got,
 						Func: func() (interface{}, error) {
@@ -175,7 +175,7 @@ var _ = Describe("Codec", func() {
 			It("works without Object and nil result", func() {
 				var callCount int64
 				perform(100, func(int) {
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key: key,
 						Func: func() (interface{}, error) {
 							atomic.AddInt64(&callCount, 1)
@@ -190,7 +190,7 @@ var _ = Describe("Codec", func() {
 			It("works without Object and error result", func() {
 				var callCount int64
 				perform(100, func(int) {
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key: key,
 						Func: func() (interface{}, error) {
 							time.Sleep(100 * time.Millisecond)
@@ -207,7 +207,7 @@ var _ = Describe("Codec", func() {
 				var callCount int64
 				do := func(sleep time.Duration) (int, error) {
 					var n int
-					err := codec.Once(&cache.Item{
+					err := codec.Once(&wrapper.Item{
 						Key:    key,
 						Object: &n,
 						Func: func() (interface{}, error) {
@@ -286,13 +286,13 @@ func newRing() *redis.Ring {
 	})
 }
 
-func newCodec() *cache.Codec {
+func newCodec() *wrapper.Codec {
 	ring := newRing()
 	_ = ring.ForEachShard(func(client *redis.Client) error {
 		return client.FlushDb().Err()
 	})
 
-	return &cache.Codec{
+	return &wrapper.Codec{
 		Redis: ring,
 
 		Marshal: func(v interface{}) ([]byte, error) {
