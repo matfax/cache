@@ -1,4 +1,5 @@
 # Redis cache library for Golang [![Build Status](https://travis-ci.org/go-redis/cache.svg?branch=v3)](https://travis-ci.org/go-redis/cache)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper?ref=badge_shield)
 
 ## Installation
 
@@ -101,3 +102,7 @@ func Example_advancedUsage() {
 	// Output: &{mystring 42}
 }
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatfax%2Fgo-redis-wrapper?ref=badge_large)
